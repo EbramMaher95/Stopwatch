@@ -510,6 +510,7 @@ void SystemClock_Config(void) {
 	/** Initializes the RCC Oscillators according to the specified parameters
 	 * in the RCC_OscInitTypeDef structure.
 	 */
+
 	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
  8000496:	2301      	movs	r3, #1
  8000498:	61bb      	str	r3, [r7, #24]

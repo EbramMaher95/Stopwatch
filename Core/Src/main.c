@@ -157,21 +157,29 @@ int main(void) {
 						MM = 0;
 						HH++;
 					}
+
+					//convert the hours, minutes and seconds into string
+					itoa(HH, str_H, 10);
+					itoa(MM, str_M, 10);
+					itoa(SS, str_S, 10);
+
+					//displaying the time
+					Alcd_Clear(&lcd);
+					Alcd_PutAt(&lcd, 0, 0, "Running");
+					Alcd_PutAt(&lcd, 1, 0, str_H);
+					Alcd_PutAt(&lcd, 1, 2, ":");
+					Alcd_PutAt(&lcd, 1, 3, str_M);
+					Alcd_PutAt(&lcd, 1, 5, ":");
+					Alcd_PutAt(&lcd, 1, 6, str_H);
+
+					//check if any button is pressed
+					if (Keypad_Matrix_Read_Key(&key, 2) | Keypad_Matrix_Read_Key(&key, 3))
+					{
+
+						start_flag = 0;
+					}
+
 				}
-
-				//convert the hours, minutes and seconds into string
-				itoa(HH, str_H, 10);
-				itoa(MM, str_M, 10);
-				itoa(SS, str_S, 10);
-
-				//displaying the time
-				Alcd_Clear(&lcd);
-				Alcd_PutAt(&lcd, 0, 0, "Running");
-				Alcd_PutAt(&lcd, 1, 0, str_H);
-				Alcd_PutAt(&lcd, 1, 2, ":");
-				Alcd_PutAt(&lcd, 1, 3, str_M);
-				Alcd_PutAt(&lcd, 1, 5, ":");
-				Alcd_PutAt(&lcd, 1, 6, str_H);
 
 			}
 		}
@@ -243,6 +251,7 @@ void SystemClock_Config(void) {
 	/** Initializes the RCC Oscillators according to the specified parameters
 	 * in the RCC_OscInitTypeDef structure.
 	 */
+
 	RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
 	RCC_OscInitStruct.HSEState = RCC_HSE_ON;
 	RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
