@@ -173,6 +173,9 @@ int main(void) {
 					Alcd_PutAt(&lcd, 1, 6, str_H);
 
 					//check if any button is pressed
+					Keypad_Matrix_Refresh(&key);
+
+					//check if any button is pressed
 					if (Keypad_Matrix_Read_Key(&key, 2)
 							| Keypad_Matrix_Read_Key(&key, 3)) {
 
