@@ -146,32 +146,34 @@ int main(void) {
 			//set the start flag to 1
 			start_flag = 1;
 
-			//increasing the time
-			HAL_Delay(1000); //a second elapsed
-			SS++;
-			if (SS == 60) {
-				SS = 0;
-				MM++;
-				if (MM >= 60) {
-					MM = 0;
-					HH++;
+			while (start_flag = 1) {
+				//increasing the time
+				HAL_Delay(1000); //a second elapsed
+				SS++;
+				if (SS == 60) {
+					SS = 0;
+					MM++;
+					if (MM >= 60) {
+						MM = 0;
+						HH++;
+					}
 				}
+
+				//convert the hours, minutes and seconds into string
+				itoa(HH, str_H, 10);
+				itoa(MM, str_M, 10);
+				itoa(SS, str_S, 10);
+
+				//displaying the time
+				Alcd_Clear(&lcd);
+				Alcd_PutAt(&lcd, 0, 0, "Running");
+				Alcd_PutAt(&lcd, 1, 0, str_H);
+				Alcd_PutAt(&lcd, 1, 2, ":");
+				Alcd_PutAt(&lcd, 1, 3, str_M);
+				Alcd_PutAt(&lcd, 1, 5, ":");
+				Alcd_PutAt(&lcd, 1, 6, str_H);
+
 			}
-
-			//convert the hours, minutes and seconds into string
-			itoa(HH, str_H, 10);
-			itoa(MM, str_M, 10);
-			itoa(SS, str_S, 10);
-
-			//displaying the time
-			Alcd_Clear(&lcd);
-			Alcd_PutAt(&lcd, 0, 0, "Running");
-			Alcd_PutAt(&lcd, 1, 0, str_H);
-			Alcd_PutAt(&lcd, 1, 2, ":");
-			Alcd_PutAt(&lcd, 1, 3, str_M);
-			Alcd_PutAt(&lcd, 1, 5, ":");
-			Alcd_PutAt(&lcd, 1, 6, str_H);
-
 		}
 
 		//stop is pressed (2) and stop watch is running
@@ -201,6 +203,9 @@ int main(void) {
 		//if the reset button (3) is pressed
 		//the start flag is not taken into consideration
 		if (Keypad_Matrix_Read_Key(&key, 3)) {
+
+			//set the start flag to 0
+			start_flag = 0;
 
 			//reseting the time
 			HH = 0, MM = 0, SS = 0;
