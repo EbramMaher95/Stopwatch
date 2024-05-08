@@ -146,7 +146,7 @@ int main(void) {
 			//set the start flag to 1
 			start_flag = 1;
 
-			while (start_flag = 1) {
+			while (start_flag == 1) {
 				//increasing the time
 				HAL_Delay(1000); //a second elapsed
 				SS++;
@@ -173,8 +173,8 @@ int main(void) {
 					Alcd_PutAt(&lcd, 1, 6, str_H);
 
 					//check if any button is pressed
-					if (Keypad_Matrix_Read_Key(&key, 2) | Keypad_Matrix_Read_Key(&key, 3))
-					{
+					if (Keypad_Matrix_Read_Key(&key, 2)
+							| Keypad_Matrix_Read_Key(&key, 3)) {
 
 						start_flag = 0;
 					}
@@ -323,6 +323,7 @@ void Error_Handler(void) {
   */
 void assert_failed(uint8_t *file, uint32_t line)
 {
+
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
