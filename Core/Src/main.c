@@ -103,13 +103,17 @@ int main(void) {
 	GPIOA, .RS_GPIO_Pin = GPIO_PIN_4, .EN_GPIO = GPIOA, .EN_GPIO_Pin =
 	GPIO_PIN_5, };
 
-	char str_H[2], str_M[2], str_S[2];
+	//string for the time displaying
+	char str[16];
 
-	//variables for hours, minutes and seconds
-	uint8_t HH, MM, SS;
+	//variables for hours, minutes, seconds and milliseconds
+	uint8_t HH = 0, MM = 0, SS = 0, MS = 0;
 
 	//start flag variable
 	uint8_t start_flag = 0;
+
+	//variables for string length and n is for looping
+	uint8_t Length, n;
 
 	//initializing the LCD
 	Alcd_Init(&lcd, 2, 16);
@@ -117,128 +121,146 @@ int main(void) {
 	//initializing the Keypad
 	Keypad_Matrix_Init(&key);
 
+	//clear the display
 	Alcd_Clear(&lcd);
 
-	//displaying the instructions for 5 seconds
-	Alcd_PutAt(&lcd, 0, 0, "Start: 1 Stop: 2");
-	Alcd_PutAt(&lcd, 1, 0, "Reset: 3");
-	HAL_Delay(5000);
+	//display the instructions for operation
+	Alcd_PutAt(&lcd, 0, 0, "Press & Hold");
+	HAL_Delay(2000);
+	Alcd_Clear(&lcd);
+
+	Alcd_PutAt(&lcd, 0, 0, "Start: 4 Stop: 5");
+	Alcd_PutAt(&lcd, 1, 0, "Reset: 6");
+	HAL_Delay(2000);
 
 	//clear the instructions
 	Alcd_Clear(&lcd);
 
-	//displaying the time
+	//display the time
+	Length = sprintf(str, "%02d:%02d:%02d", HH, MM, SS);
+	Alcd_PutAt(&lcd, 0, 0, "waiting 4 input");
+	Alcd_PutAt_n(&lcd, 1, 0, str, Length);
 
 	/* USER CODE END 2 */
 
 	/* Infinite loop */
 	/* USER CODE BEGIN WHILE */
 	while (1) {
-		/* USER CODE END WHILE */
 
+		//refresh the keypad
 		Keypad_Matrix_Refresh(&key);
 
-		//case start: 1 is selected and time is zero
-		//this means if 1 is selected but the time is not zero, nothing happens
-		if (Keypad_Matrix_Read_Key(&key, 1) && (HH = 0) && (MM = 0)
-				&& (SS = 0)) {
+		//if 4 is pressed -> start
+		if (Keypad_Matrix_Read_Key(&key, 4)) {
 
 			//set the start flag to 1
 			start_flag = 1;
 
 			while (start_flag == 1) {
-				//increasing the time
-				HAL_Delay(1000); //a second elapsed
-				SS++;
-				if (SS == 60) {
-					SS = 0;
-					MM++;
-					if (MM >= 60) {
-						MM = 0;
-						HH++;
-					}
 
-					//convert the hours, minutes and seconds into string
-					itoa(HH, str_H, 10);
-					itoa(MM, str_M, 10);
-					itoa(SS, str_S, 10);
+				//looping for milliseocnds
+				for (n = 0; n < 11; n++) {
 
-					//displaying the time
-					Alcd_Clear(&lcd);
-					Alcd_PutAt(&lcd, 0, 0, "Running");
-					Alcd_PutAt(&lcd, 1, 0, str_H);
-					Alcd_PutAt(&lcd, 1, 2, ":");
-					Alcd_PutAt(&lcd, 1, 3, str_M);
-					Alcd_PutAt(&lcd, 1, 5, ":");
-					Alcd_PutAt(&lcd, 1, 6, str_H);
+					//delay time
+					//delay should be 100 ms but it is adjusted to compensate
+					//operation cycles time
+					HAL_Delay(89);
 
-					//check if any button is pressed
-					Keypad_Matrix_Refresh(&key);
-
-					//check if any button is pressed
-					if (Keypad_Matrix_Read_Key(&key, 2)
-							| Keypad_Matrix_Read_Key(&key, 3)) {
-
-						start_flag = 0;
-					}
+					//increment milliseconds counter
+					MS = MS + 100;
 
 				}
 
+				//increment seconds
+				SS++;
+
+				//check if seconds are 60
+				if (SS == 60) {
+
+					//set seconds to zero
+					SS = 0;
+
+					//increment minutes
+					MM++;
+
+					//check if minutes are 60
+					if (MM >= 60) {
+
+						//set minutes to zero
+						MM = 0;
+
+						//increment hours
+						HH++;
+						if (HH >= 12) {
+							HH = 0;
+						}
+					}
+				}
+
+				//displaying the time
+				Alcd_Clear(&lcd);
+				Length = sprintf(str, "%02d:%02d:%02d", HH, MM, SS);
+				Alcd_PutAt(&lcd, 0, 0, "Running");
+				Alcd_PutAt_n(&lcd, 1, 0, str, Length);
+
+				//check if any other button is pressed
+				Keypad_Matrix_Refresh(&key);
+
+				// 5 is pressed -> stop
+				if (Keypad_Matrix_Read_Key(&key, 5)) {
+
+					//set the flag to zero
+					start_flag = 0;
+
+					//display the time
+					Length = sprintf(str, "%02d:%02d:%02d", HH, MM, SS);
+					Alcd_Clear(&lcd);
+					Alcd_PutAt(&lcd, 0, 0, "Stopped");
+					Alcd_PutAt_n(&lcd, 1, 0, str, Length);
+				}
+
+				// 6 is pressed and stop watch is counting -> reset
+				if (Keypad_Matrix_Read_Key(&key, 6)) {
+
+					//set the flag to zero
+					start_flag = 0;
+
+					//resetting the time to zero
+					MS = SS = MM = HH = 0;
+
+					//displaying the time
+					Length = sprintf(str, "%02d:%02d:%02d", HH, MM, SS);
+					Alcd_Clear(&lcd);
+					Alcd_PutAt(&lcd, 0, 0, "Reset");
+					Alcd_PutAt_n(&lcd, 1, 0, str, Length);
+				}
+
 			}
+
 		}
 
-		//stop is pressed (2) and stop watch is running
-		//this means that if stop is pressed and the flag is not 1, nothing happens
-		if (Keypad_Matrix_Read_Key(&key, 2) && (start_flag = 1)) {
+		//6 is pressed and counter is not working -> reset
+		if (Keypad_Matrix_Read_Key(&key, 6)) {
 
-			//set the start flag to zero
+			//setting the flag to zero
 			start_flag = 0;
 
-			//no incrementing happens to the time
-
-			//convert the hours, minutes and seconds into string
-			itoa(HH, str_H, 10);
-			itoa(MM, str_M, 10);
-			itoa(SS, str_S, 10);
+			//reset the time to zero
+			MS = SS = MM = HH = 0;
 
 			//displaying the time
-			Alcd_Clear(&lcd);
-			Alcd_PutAt(&lcd, 0, 0, "Stopped");
-			Alcd_PutAt(&lcd, 1, 0, str_H);
-			Alcd_PutAt(&lcd, 1, 2, ":");
-			Alcd_PutAt(&lcd, 1, 3, str_M);
-			Alcd_PutAt(&lcd, 1, 5, ":");
-			Alcd_PutAt(&lcd, 1, 6, str_H);
-		}
-
-		//if the reset button (3) is pressed
-		//the start flag is not taken into consideration
-		if (Keypad_Matrix_Read_Key(&key, 3)) {
-
-			//set the start flag to 0
-			start_flag = 0;
-
-			//reseting the time
-			HH = 0, MM = 0, SS = 0;
-
-			//convert the hours, minutes and seconds into string
-			itoa(HH, str_H, 10);
-			itoa(MM, str_M, 10);
-			itoa(SS, str_S, 10);
-
-			//displaying the time
+			Length = sprintf(str, "%02d:%02d:%02d", HH, MM, SS);
 			Alcd_Clear(&lcd);
 			Alcd_PutAt(&lcd, 0, 0, "Reset");
-			Alcd_PutAt(&lcd, 1, 0, str_H);
-			Alcd_PutAt(&lcd, 1, 2, ":");
-			Alcd_PutAt(&lcd, 1, 3, str_M);
-			Alcd_PutAt(&lcd, 1, 5, ":");
-			Alcd_PutAt(&lcd, 1, 6, str_H);
-
+			Alcd_PutAt_n(&lcd, 1, 0, str, Length);
 		}
+		/* USER CODE BEGIN 3 */
+		/* USER CODE END WHILE */
 
 		/* USER CODE BEGIN 3 */
+
 	}
+
 	/* USER CODE END 3 */
 
 }
