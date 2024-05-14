@@ -190,11 +190,11 @@ int main(void) {
 		if (start_flag == 1) {
 
 			//delay for 100 ms -> this time is adjusted to compensate cycles delay
-			HAL_Delay(100);
+			HAL_Delay(105);
 
 			//increment milliseconds by 100 -> it is 10 because the resolution is
 			// 2 digits in the display only
-			MS = MS + 10;
+			MS = MS + 12;
 
 			//in case 1 second elapsed
 			if (MS > 99) {
