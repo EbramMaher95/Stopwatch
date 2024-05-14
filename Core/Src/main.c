@@ -199,8 +199,8 @@ int main(void) {
 			//in case 1 second elapsed
 			if (MS > 99) {
 
-				//reset milliseconds counter
-				MS = 0;
+				//decrement 1 second from the milliseconds counter (1000 ms)
+				MS = MS - 100;
 
 				//increment seconds by 1
 				SS++;
