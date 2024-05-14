@@ -113,7 +113,7 @@ int main(void) {
 	uint8_t start_flag = 0;
 
 	//variables for string length and n is for looping
-	uint8_t Length, n;
+	uint8_t Length;
 
 	//initializing the LCD
 	Alcd_Init(&lcd, 2, 16);
@@ -126,12 +126,12 @@ int main(void) {
 
 	//display the instructions for operation
 	Alcd_PutAt(&lcd, 0, 0, "Press & Hold");
-	HAL_Delay(2000);
+	HAL_Delay(2);
 	Alcd_Clear(&lcd);
 
 	Alcd_PutAt(&lcd, 0, 0, "Start: 4 Stop: 5");
 	Alcd_PutAt(&lcd, 1, 0, "Reset: 6");
-	HAL_Delay(2000);
+	HAL_Delay(2);
 
 	//clear the instructions
 	Alcd_Clear(&lcd);
@@ -156,105 +156,27 @@ int main(void) {
 			//set the start flag to 1
 			start_flag = 1;
 
-			while (start_flag == 1) {
+			//if 5 is pressed -> stop
+		} else if (Keypad_Matrix_Read_Key(&key, 5)) {
 
-				//looping for milliseocnds
-				for (n = 0; n < 10; n++) {
+			//set the flag to zero
+			start_flag = 0;
 
-					//delay time
-					//delay should be 100 ms but it is adjusted to compensate
-					//operation cycles time
-					HAL_Delay(98);
-
-					//increment milliseconds counter
-					MS = MS + 100;
-
-					//displaying the time
-					Alcd_Clear(&lcd);
-					Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS,
-							MS);
-					Alcd_PutAt(&lcd, 0, 0, "Running");
-					Alcd_PutAt_n(&lcd, 1, 0, str, Length);
-
-				}
-
-				//increment seconds
-				SS++;
-
-				//check if seconds are 60
-				if (SS == 60) {
-
-					//set seconds to zero
-					SS = 0;
-
-					//increment minutes
-					MM++;
-
-					//check if minutes are 60
-					if (MM >= 60) {
-
-						//set minutes to zero
-						MM = 0;
-
-						//increment hours
-						HH++;
-						if (HH >= 12) {
-							HH = 0;
-						}
-					}
-				}
-
-				//displaying the time
-				Alcd_Clear(&lcd);
-				Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS, MS);
-				Alcd_PutAt(&lcd, 0, 0, "Running");
-				Alcd_PutAt_n(&lcd, 1, 0, str, Length);
-
-				//check if any other button is pressed
-				Keypad_Matrix_Refresh(&key);
-
-				// 5 is pressed -> stop
-				if (Keypad_Matrix_Read_Key(&key, 5)) {
-
-					//set the flag to zero
-					start_flag = 0;
-
-					//display the time
-					Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS,
-							MS);
-					Alcd_Clear(&lcd);
-					Alcd_PutAt(&lcd, 0, 0, "Stopped");
-					Alcd_PutAt_n(&lcd, 1, 0, str, Length);
-				}
-
-				// 6 is pressed and stop watch is counting -> reset
-				if (Keypad_Matrix_Read_Key(&key, 6)) {
-
-					//set the flag to zero
-					start_flag = 0;
-
-					//resetting the time to zero
-					MS = SS = MM = HH = 0;
-
-					//displaying the time
-					Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS,
-							MS);
-					Alcd_Clear(&lcd);
-					Alcd_PutAt(&lcd, 0, 0, "Reset");
-					Alcd_PutAt_n(&lcd, 1, 0, str, Length);
-				}
-
-			}
+			//display the time
+			Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS, MS);
+			Alcd_Clear(&lcd);
+			Alcd_PutAt(&lcd, 0, 0, "Stopped");
+			Alcd_PutAt_n(&lcd, 1, 0, str, Length);
 
 		}
 
-		//6 is pressed and counter is not working -> reset
+		// 6 is pressed and stop watch is counting -> reset
 		if (Keypad_Matrix_Read_Key(&key, 6)) {
 
-			//setting the flag to zero
+			//set the flag to zero
 			start_flag = 0;
 
-			//reset the time to zero
+			//resetting the time to zero
 			MS = SS = MM = HH = 0;
 
 			//displaying the time
@@ -263,6 +185,70 @@ int main(void) {
 			Alcd_PutAt(&lcd, 0, 0, "Reset");
 			Alcd_PutAt_n(&lcd, 1, 0, str, Length);
 		}
+
+		//in case that the start flag is 1 --> start counting
+		if (start_flag == 1) {
+
+			//delay for 100 ms -> this time is adjusted to compensate cycles delay
+			HAL_Delay(100);
+
+			//increment milliseconds by 100 -> it is 10 because the resolution is
+			// 2 digits in the display only
+			MS = MS + 10;
+
+			//in case 1 second elapsed
+			if (MS > 99) {
+
+				//reset milliseconds counter
+				MS = 0;
+
+				//increment seconds by 1
+				SS++;
+
+				//if 1 minute elapsed
+				if (SS > 59) {
+
+					//reset seconds counter
+					SS = 0;
+
+					//increment minutes by 1
+					MM++;
+
+					//if 1 hour elapsed
+					if (MM > 59) {
+
+						//reset minutes counter
+						MM = 0;
+
+						//increment hours by 1
+						HH++;
+
+						//if reached 100 -> display maximum capacity reached
+						if (HH > 99) {
+
+							//set the start flag to 0 to stop counting
+							start_flag = 0;
+
+							//display a message
+							Alcd_Clear(&lcd);
+							Alcd_PutAt(&lcd, 0, 0, "Stopped");
+							Alcd_PutAt(&lcd, 1, 0, "Overflow");
+
+						}
+
+					}
+
+				}
+
+			}
+			//displaying the time
+			Alcd_Clear(&lcd);
+			Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS, MS);
+			Alcd_PutAt(&lcd, 0, 0, "Running");
+			Alcd_PutAt_n(&lcd, 1, 0, str, Length);
+
+		}
+
 		/* USER CODE BEGIN 3 */
 		/* USER CODE END WHILE */
 
