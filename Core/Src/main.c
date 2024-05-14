@@ -159,15 +159,22 @@ int main(void) {
 			while (start_flag == 1) {
 
 				//looping for milliseocnds
-				for (n = 0; n < 11; n++) {
+				for (n = 0; n < 10; n++) {
 
 					//delay time
 					//delay should be 100 ms but it is adjusted to compensate
 					//operation cycles time
-					HAL_Delay(89);
+					HAL_Delay(98);
 
 					//increment milliseconds counter
 					MS = MS + 100;
+
+					//displaying the time
+					Alcd_Clear(&lcd);
+					Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS,
+							MS);
+					Alcd_PutAt(&lcd, 0, 0, "Running");
+					Alcd_PutAt_n(&lcd, 1, 0, str, Length);
 
 				}
 
@@ -199,7 +206,7 @@ int main(void) {
 
 				//displaying the time
 				Alcd_Clear(&lcd);
-				Length = sprintf(str, "%02d:%02d:%02d", HH, MM, SS);
+				Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS, MS);
 				Alcd_PutAt(&lcd, 0, 0, "Running");
 				Alcd_PutAt_n(&lcd, 1, 0, str, Length);
 
@@ -213,7 +220,8 @@ int main(void) {
 					start_flag = 0;
 
 					//display the time
-					Length = sprintf(str, "%02d:%02d:%02d", HH, MM, SS);
+					Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS,
+							MS);
 					Alcd_Clear(&lcd);
 					Alcd_PutAt(&lcd, 0, 0, "Stopped");
 					Alcd_PutAt_n(&lcd, 1, 0, str, Length);
@@ -229,7 +237,8 @@ int main(void) {
 					MS = SS = MM = HH = 0;
 
 					//displaying the time
-					Length = sprintf(str, "%02d:%02d:%02d", HH, MM, SS);
+					Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS,
+							MS);
 					Alcd_Clear(&lcd);
 					Alcd_PutAt(&lcd, 0, 0, "Reset");
 					Alcd_PutAt_n(&lcd, 1, 0, str, Length);
@@ -249,7 +258,7 @@ int main(void) {
 			MS = SS = MM = HH = 0;
 
 			//displaying the time
-			Length = sprintf(str, "%02d:%02d:%02d", HH, MM, SS);
+			Length = sprintf(str, "%02d:%02d:%02d:%02d", HH, MM, SS, MS);
 			Alcd_Clear(&lcd);
 			Alcd_PutAt(&lcd, 0, 0, "Reset");
 			Alcd_PutAt_n(&lcd, 1, 0, str, Length);
