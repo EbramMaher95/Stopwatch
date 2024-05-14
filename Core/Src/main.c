@@ -126,12 +126,12 @@ int main(void) {
 
 	//display the instructions for operation
 	Alcd_PutAt(&lcd, 0, 0, "Press & Hold");
-	HAL_Delay(2);
+	HAL_Delay(2000);
 	Alcd_Clear(&lcd);
 
 	Alcd_PutAt(&lcd, 0, 0, "Start: 4 Stop: 5");
 	Alcd_PutAt(&lcd, 1, 0, "Reset: 6");
-	HAL_Delay(2);
+	HAL_Delay(2000);
 
 	//clear the instructions
 	Alcd_Clear(&lcd);
